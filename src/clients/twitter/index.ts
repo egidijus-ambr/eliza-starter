@@ -1,6 +1,7 @@
 import { TwitterClientInterface } from "./client";
 import { TwitterAutoCopyClient } from "./auto-copy-client";
 import { TwitterFollowerClient } from "./follower-client";
+import { TwitterLikerClient } from "./liker-client";
 
 const twitterPlugin = {
   name: "twitter",
@@ -8,4 +9,4 @@ const twitterPlugin = {
   clients: [TwitterClientInterface],
 };
 export default twitterPlugin;
-export { TwitterAutoCopyClient, TwitterFollowerClient };
+export { TwitterAutoCopyClient, TwitterFollowerClient, TwitterLikerClient };

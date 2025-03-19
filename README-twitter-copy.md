@@ -13,7 +13,6 @@ This feature allows your Twitter bot to copy tweets with media from other users 
   "settings": {
     "twitter": {
       "trackUsers": ["elonmusk", "nasa", "natgeo", "bbcearth", "cnn"],
-      "copyInterval": 120,
       "includeVideos": true,
       "maxPostsToCheck": 20,
       "avoidDuplicates": true

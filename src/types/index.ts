@@ -1,11 +1,9 @@
 // Define Twitter settings interface
 export interface TwitterSettings {
   trackUsers?: string[];
-  copyInterval?: number;
   includeVideos?: boolean;
   maxPostsToCheck?: number;
   avoidDuplicates?: boolean;
-  copyIntervalDescription?: string;
   includeVideosDescription?: string;
   maxPostsToCheckDescription?: string;
   avoidDuplicatesDescription?: string;
@@ -23,6 +21,20 @@ export interface TwitterSettings {
   autoFollowUsersPerRunDescription?: string;
   autoFollowUnfollowAfterDaysDescription?: string;
   autoFollowMaxFollowerCountDescription?: string;
+
+  // Auto-liker settings
+  autoLikeEnabled?: boolean;
+  autoLikeInterval?: number;
+  autoLikeCommentsPerRun?: number;
+  autoLikeMinCommentLength?: number;
+  autoLikeMaxLikesPerDay?: number;
+
+  // Auto-liker description fields
+  autoLikeEnabledDescription?: string;
+  autoLikeIntervalDescription?: string;
+  autoLikeCommentsPerRunDescription?: string;
+  autoLikeMinCommentLengthDescription?: string;
+  autoLikeMaxLikesPerDayDescription?: string;
 }
 
 // Helper function to extract Twitter settings from character

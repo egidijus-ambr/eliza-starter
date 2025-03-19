@@ -77,7 +77,6 @@ The bot can automatically copy tweets from specified users on a schedule. This i
         "bbcearth",
         "cnn"
       ],
-      "copyInterval": 120,
       "includeVideos": true,
       "maxPostsToCheck": 20,
       "avoidDuplicates": true
@@ -89,7 +88,6 @@ The bot can automatically copy tweets from specified users on a schedule. This i
 Configuration options:
 
 - `trackUsers`: Array of Twitter usernames to track and copy from
-- `copyInterval`: Minutes between copying posts (default: 120)
 - `includeVideos`: Whether to include videos in addition to images (default: true)
 - `maxPostsToCheck`: Maximum number of posts to check per user (default: 20)
 - `avoidDuplicates`: Avoid copying posts that have already been copied (default: true)

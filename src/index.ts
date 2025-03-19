@@ -7,7 +7,9 @@ import {
   type Character,
 } from "@elizaos/core";
 
-// Set the log level to 'trace' to see all log messages including elizaLogger.log
+// Set the log level to 'debug' to see debug messages and above
+elizaLogger.level = "info";
+console.log("Log level set to:", elizaLogger.level);
 
 import { bootstrapPlugin } from "@elizaos/plugin-bootstrap";
 import { createNodePlugin } from "@elizaos/plugin-node";
