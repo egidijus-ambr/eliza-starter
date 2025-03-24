@@ -4,7 +4,7 @@
   "clients": [
     "twitter"
   ],
-  "modelProvider": "grok",
+  "modelProvider": "openai",
   "settings": {
     "imageVisionModelProvider": "llama_local",
     "secrets": {},
