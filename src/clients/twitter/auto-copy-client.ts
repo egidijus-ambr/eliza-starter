@@ -36,6 +36,7 @@ const twitterPostTemplate = `
 
 # Image Context
 {{imageDescriptions}}
+<!-- This will contain description of the beautiful woman in the photo -->
 
 # Task: Generate a very short post in the voice and style of {{agentName}} @{{twitterUserName}}.
 Write a post that is {{adjective}} about {{topic}} (without mentioning {{topic}} directly), from the perspective of {{agentName}}.

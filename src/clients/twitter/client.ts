@@ -10,8 +10,6 @@ import { TwitterInteractionClient } from "./interactions.ts";
 import { TwitterPostClient } from "./post.ts";
 import { TwitterSearchClient } from "./search.ts";
 import { TwitterAutoCopyClient } from "./auto-copy-client.js";
-import { TwitterFollowerClient } from "./follower-client.js";
-import { TwitterLikerClient } from "./liker-client.js";
 import { getTwitterSettings } from "../../types/index.js";
 
 /**
@@ -30,8 +28,6 @@ class TwitterManager {
   search: TwitterSearchClient;
   interaction: TwitterInteractionClient;
   autoCopy: TwitterAutoCopyClient;
-  follower: TwitterFollowerClient;
-  liker: TwitterLikerClient;
   // Temporarily commented out as TwitterAirtableClient is not available
   // airtable: TwitterAirtableClient;
 
@@ -57,12 +53,6 @@ class TwitterManager {
 
     // Initialize auto-copy client
     this.autoCopy = new TwitterAutoCopyClient(this.client, runtime);
-
-    // Initialize follower client
-    this.follower = new TwitterFollowerClient(this.client, runtime);
-
-    // Initialize liker client
-    this.liker = new TwitterLikerClient(this.client, runtime);
 
     // Temporarily commented out as TwitterAirtableClient is not available
     // Initialize Airtable client
@@ -103,20 +93,6 @@ export const TwitterClientInterface: Client & { name: string } = {
       elizaLogger.log("Initializing Twitter auto-copy feature");
       await manager.autoCopy.init();
       await manager.autoCopy.start();
-    }
-
-    // Start auto-follower if configured
-    if (twitterSettings.autoFollowEnabled) {
-      elizaLogger.log("Initializing Twitter auto-follower feature");
-      await manager.follower.init();
-      await manager.follower.start();
-    }
-
-    // Start auto-liker if configured
-    if (twitterSettings.autoLikeEnabled) {
-      elizaLogger.log("Initializing Twitter auto-liker feature");
-      await manager.liker.init();
-      await manager.liker.start();
     }
 
     return manager;
