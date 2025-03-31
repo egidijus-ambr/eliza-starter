@@ -34,6 +34,27 @@ import { MediaData } from "./types.ts";
 
 const MAX_TIMELINES_TO_FETCH = 15;
 
+const twitterCommnetTemplate = `
+# Areas of Expertise
+{{knowledge}}
+
+# About {{agentName}} (@{{twitterUserName}}):
+{{bio}}
+{{lore}}
+{{topics}}
+
+{{providers}}
+
+{{characterPostExamples}}
+
+{{postDirections}}
+
+# Task: Generate a post in the voice and style and perspective of {{agentName}} @{{twitterUserName}}.
+Write a post that is {{adjective}} about {{topic}} (without mentioning {{topic}} directly), from the perspective of {{agentName}}.  
+Your response must be 2 or 3 sentences, separated by \\n\\n (doube spaces) to create distinct lines.  
+Each sentence should stand alone as a concise, impactful statement.  
+The total character count MUST be less than {{maxTweetLength}}.  `;
+
 const twitterPostTemplate = `
 # Areas of Expertise
 {{knowledge}}
@@ -51,7 +72,7 @@ const twitterPostTemplate = `
 
 # Task: Generate a post in the voice and style and perspective of {{agentName}} @{{twitterUserName}}.
 Write a post that is {{adjective}} about {{topic}} (without mentioning {{topic}} directly), from the perspective of {{agentName}}.  
-Your response must be 2 or 3 sentences, separated by \\n\\n (double spaces) to create distinct lines.  
+Put each sentence on a new line with a blank line between them.
 Each sentence should stand alone as a concise, impactful statement.  
 The total character count MUST be less than {{maxTweetLength}}.  `;
 
@@ -523,7 +544,7 @@ export class TwitterPostClient {
         modelClass: ModelClass.SMALL,
       });
 
-      const rawTweetContent = cleanJsonResponse(response);
+      const rawTweetContent = response; //cleanJsonResponse(response);
 
       // First attempt to clean content
       let tweetTextForPosting = null;
@@ -572,7 +593,6 @@ export class TwitterPostClient {
       const removeQuotes = (str: string) => str.replace(/^['"](.*)['"]$/, "$1");
 
       const fixNewLines = (str: string) => str.replaceAll(/\\n/g, "\n\n"); //ensures double spaces
-
       // Final cleaning
       tweetTextForPosting = removeQuotes(fixNewLines(tweetTextForPosting));
 
@@ -608,10 +628,11 @@ export class TwitterPostClient {
           );
         }
       } catch (error) {
-        elizaLogger.error("Error sending tweet:", error);
+        elizaLogger.error(`Error sending tweet:"\n ${error}`);
       }
     } catch (error) {
-      elizaLogger.error("Error generating new tweet:", error);
+      elizaLogger.error(`Error generating new tweet:\n ${error}`);
+      console.error(error);
     }
   }
 

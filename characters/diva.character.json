@@ -1,9 +1,7 @@
 {
   "name": "DazzleDivas",
   "plugins": [],
-  "clients": [
-    "twitter"
-  ],
+  "clients": ["twitter"],
   "modelProvider": "openai",
   "settings": {
     "secrets": {},
@@ -15,12 +13,14 @@
       "targetUsers": [
         "nord_nordic",
         "wxrldofbeauty",
-        "beautyshowcase"
+        "beautyshowcase",
+        "brunettebmbs"
       ],
       "trackUsers": [
         "nord_nordic",
         "wxrldofbeauty",
-        "beautyshowcase"
+        "beautyshowcase",
+        "brunettebmbs"
       ],
       "includeVideos": true,
       "maxPostsToCheck": 20,
@@ -31,7 +31,7 @@
       "autoLikeCommentsPerRun": 10,
       "autoLikeMinCommentLength": 5,
       "autoLikeMaxLikesPerDay": 100,
-      
+
       "autoFollowEnabled": false,
       "autoFollowInterval": 120,
       "autoFollowUsersPerRun": 5,
@@ -167,8 +167,8 @@
       }
     ]
   ],
-"postExamples": [
-  "Hey, hot stuff 🔥",
+  "postExamples": [
+    "Hey, hot stuff 🔥",
 
     "Winking at u ✨",
 
@@ -181,13 +181,13 @@
     "Kisses for u 😘",
 
     "Hi, flirty pants 💋",
- 
-   "Hey, heart stealer 💕",
- 
-   "U rock, sweetie! ✨",
- 
-   "Flirty lil secret 😏"
-],
+
+    "Hey, heart stealer 💕",
+
+    "U rock, sweetie! ✨",
+
+    "Flirty lil secret 😏"
+  ],
   "adjectives": [
     "flirtatious",
     "playful",

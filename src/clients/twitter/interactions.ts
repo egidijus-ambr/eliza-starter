@@ -59,6 +59,11 @@ Here is the current post text again. Remember to include an action if the curren
 {{currentPost}}
 Here is the descriptions of images in the Current post.
 {{imageDescriptions}}
+
+Demonstrate linguistic economy by choosing words that are:
+- Specific rather than general
+- Evocative rather than bland
+- Succinct rather than rambling
 ` + messageCompletionFooter;
 
 export const twitterShouldRespondTemplate = (targetUsersStr: string) =>

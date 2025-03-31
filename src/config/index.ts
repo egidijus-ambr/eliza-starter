@@ -1,5 +1,9 @@
-
-import { Character, ModelProviderName, settings, validateCharacterConfig } from "@elizaos/core";
+import {
+  Character,
+  ModelProviderName,
+  settings,
+  validateCharacterConfig,
+} from "@elizaos/core";
 import fs from "fs";
 import path from "path";
 import yargs from "yargs";
@@ -99,5 +103,11 @@ export function getTokenForProvider(
       );
     case ModelProviderName.GROQ:
       return character.settings?.secrets?.GROQ_API_KEY || settings.GROQ_API_KEY;
+    case ModelProviderName.VERTEX:
+      return (
+        character.settings?.secrets?.GOOGLE_APPLICATION_CREDENTIALS ||
+        settings.GOOGLE_APPLICATION_CREDENTIALS ||
+        process.env.GOOGLE_APPLICATION_CREDENTIALS
+      );
   }
 }

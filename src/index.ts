@@ -28,6 +28,7 @@ import {
   parseArguments,
 } from "./config/index.ts";
 import { initializeDatabase } from "./database/index.ts";
+import { createVertexProvider } from "./vertex-provider.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -54,6 +55,25 @@ export function createAgent(
 
   nodePlugin ??= createNodePlugin();
 
+  // Determine if we need to provide the Vertex provider
+  const providers = [];
+  if (character.modelProvider === "vertex") {
+    providers.push(createVertexProvider());
+  }
+
+  // ```typescript
+  // const customRuntime = new AgentRuntime({
+  //     databaseAdapter: new PostgresDatabaseAdapter(config),
+  //     modelProvider: new OpenAIProvider(apiKey),
+  //     plugins: [solanaPlugin, customPlugin],
+  //     services: [
+  //         new VideoService(),
+  //         new ImageDescriptionService(),
+  //         new SpeechService(),
+  //     ],
+  // });
+  // ```
+
   return new AgentRuntime({
     databaseAdapter: db,
     token,
@@ -65,7 +85,7 @@ export function createAgent(
       nodePlugin,
       character.settings?.secrets?.WALLET_PUBLIC_KEY ? solanaPlugin : null,
     ].filter(Boolean),
-    providers: [],
+    providers,
     actions: [],
     services: [],
     managers: [],
