@@ -34,7 +34,7 @@ declare module "@elizaos/core" {
 }
 
 // Make TypeScript recognize VERTEX as a value of ModelProviderName
-(ModelProviderName as any).VERTEX = "vertex";
+(ModelProviderName as any).VERTEX = "google";
 
 export class VertexProvider implements ModelProvider {
   private vertexAI: VertexAI;

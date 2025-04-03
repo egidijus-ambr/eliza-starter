@@ -21,6 +21,7 @@ import { type IImageDescriptionService, ServiceType } from "@elizaos/core";
 import { buildConversationThread, fetchMediaData } from "./utils.ts";
 import { twitterMessageHandlerTemplate } from "./interactions.ts";
 import { DEFAULT_MAX_TWEET_LENGTH } from "./environment.ts";
+import { getTwitterSettings } from "../../types/index.js";
 import {
   Client,
   Events,
@@ -762,6 +763,10 @@ export class TwitterPostClient {
             }
           );
 
+          console.log(
+            "twitterActionTemplate",
+            this.runtime.character.templates?.twitterActionTemplate
+          );
           const actionContext = composeContext({
             state: tweetState,
             template:

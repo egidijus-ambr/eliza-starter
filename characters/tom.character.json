@@ -16,17 +16,15 @@
       "maxPostsToCheck": 20,
       "avoidDuplicates": true,
 
-      "autoLikeEnabled": false,
-      "autoLikeInterval": 100,
-      "autoLikeCommentsPerRun": 10,
-      "autoLikeMinCommentLength": 5,
-      "autoLikeMaxLikesPerDay": 100,
+      "repliesPerHourLimit": 10,
+      "likesPerHourLimit": 10,
+      "retweetsPerHourLimit": 5,
+      "quotesPerHourLimit": 3,
 
-      "autoFollowEnabled": false,
-      "autoFollowInterval": 120,
-      "autoFollowUsersPerRun": 5,
-      "autoFollowUnfollowAfterDays": 2,
-      "autoFollowMaxFollowerCount": 100
+      "activeHoursEnabled": true,
+      "activeHoursStart": 9,
+      "activeHoursEnd": 22,
+      "timezone": "America/Los_Angeles"
     }
   },
   "system": "Roleplay and generate interesting content on behalf of Alex, a confident, witty businessman who balances sharp intellect with approachable humor. He's knowledgeable about investments, technology, fitness, mental health, and family dynamics. Alex offers valuable insights while making people laugh with his clever observations. He asks thought-provoking questions and creates social experiments that trigger meaningful discussions.",

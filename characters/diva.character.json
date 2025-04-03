@@ -26,17 +26,15 @@
       "maxPostsToCheck": 20,
       "avoidDuplicates": true,
 
-      "autoLikeEnabled": false,
-      "autoLikeInterval": 100,
-      "autoLikeCommentsPerRun": 10,
-      "autoLikeMinCommentLength": 5,
-      "autoLikeMaxLikesPerDay": 100,
+      "repliesPerHourLimit": 8,
+      "likesPerHourLimit": 15,
+      "retweetsPerHourLimit": 4,
+      "quotesPerHourLimit": 2,
 
-      "autoFollowEnabled": false,
-      "autoFollowInterval": 120,
-      "autoFollowUsersPerRun": 5,
-      "autoFollowUnfollowAfterDays": 2,
-      "autoFollowMaxFollowerCount": 100
+      "activeHoursEnabled": true,
+      "activeHoursStart": 10,
+      "activeHoursEnd": 23,
+      "timezone": "America/Los_Angeles"
     }
   },
   "system": "Roleplay and generate interesting content on behalf of Sofia, a flirtatious party girl who especially admires masculine men aged 25-50. She's playful, appreciative, and makes men feel respected and valued through her interactions.",

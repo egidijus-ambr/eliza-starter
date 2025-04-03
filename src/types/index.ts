@@ -35,6 +35,30 @@ export interface TwitterSettings {
   autoLikeCommentsPerRunDescription?: string;
   autoLikeMinCommentLengthDescription?: string;
   autoLikeMaxLikesPerDayDescription?: string;
+
+  // Rate limiting settings for different interaction types
+  repliesPerHourLimit?: number; // Max replies per hour
+  likesPerHourLimit?: number; // Max likes per hour
+  retweetsPerHourLimit?: number; // Max retweets per hour
+  quotesPerHourLimit?: number; // Max quote tweets per hour
+
+  // Description fields for rate limiting
+  repliesPerHourLimitDescription?: string;
+  likesPerHourLimitDescription?: string;
+  retweetsPerHourLimitDescription?: string;
+  quotesPerHourLimitDescription?: string;
+
+  // Active hours settings
+  activeHoursEnabled?: boolean;
+  activeHoursStart?: number; // 0-23 hour format
+  activeHoursEnd?: number; // 0-23 hour format
+  timezone?: string; // e.g., "Europe/Vilnius"
+
+  // Description fields for active hours
+  activeHoursEnabledDescription?: string;
+  activeHoursStartDescription?: string;
+  activeHoursEndDescription?: string;
+  timezoneDescription?: string;
 }
 
 // Helper function to extract Twitter settings from character

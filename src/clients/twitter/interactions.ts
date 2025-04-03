@@ -19,6 +19,7 @@ import {
 } from "@elizaos/core";
 import type { ClientBase } from "./base.ts";
 import { buildConversationThread, sendTweet, wait } from "./utils.ts";
+import { getTwitterSettings } from "../../types/index.js";
 
 export const twitterMessageHandlerTemplate =
   `
@@ -102,10 +103,151 @@ export class TwitterInteractionClient {
   client: ClientBase;
   runtime: IAgentRuntime;
   private isDryRun: boolean;
+
+  // Rate limiting counters
+  private repliesCount: number = 0;
+  private likesCount: number = 0;
+  private retweetsCount: number = 0;
+  private quotesCount: number = 0;
+  private lastResetTime: number = Date.now();
+
   constructor(client: ClientBase, runtime: IAgentRuntime) {
     this.client = client;
     this.runtime = runtime;
     this.isDryRun = this.client.twitterConfig.TWITTER_DRY_RUN;
+  }
+
+  /**
+   * Checks if the current time is within the bot's active hours
+   * @returns boolean indicating if the bot should be active now
+   */
+  private isWithinActiveHours(): boolean {
+    const twitterSettings = getTwitterSettings(this.runtime.character);
+
+    // If active hours are not enabled, always return true
+    if (!twitterSettings.activeHoursEnabled) {
+      return true;
+    }
+
+    const start = twitterSettings.activeHoursStart ?? 0;
+    const end = twitterSettings.activeHoursEnd ?? 24;
+    const timezone = twitterSettings.timezone || "UTC";
+
+    // Get current hour in the specified timezone
+    const now = new Date();
+    const options: Intl.DateTimeFormatOptions = {
+      hour: "numeric",
+      hour12: false,
+      timeZone: timezone,
+    };
+
+    // Format date to get just the hour in 24-hour format
+    const currentHourStr = now.toLocaleString("en-US", options);
+    const currentHour = parseInt(currentHourStr, 10);
+
+    // Check if current hour is within active hours
+    return currentHour >= start && currentHour < end;
+  }
+
+  /**
+   * Resets interaction counters if an hour has passed since last reset
+   */
+  private resetCountersIfNeeded(): void {
+    const now = Date.now();
+    const oneHour = 60 * 60 * 1000;
+
+    if (now - this.lastResetTime >= oneHour) {
+      this.repliesCount = 0;
+      this.likesCount = 0;
+      this.retweetsCount = 0;
+      this.quotesCount = 0;
+      this.lastResetTime = now;
+      elizaLogger.log("Hourly interaction counters reset");
+    }
+  }
+
+  /**
+   * Checks if an interaction can be performed based on hourly limits
+   * @param type The type of interaction to check
+   * @returns boolean indicating if the interaction can be performed
+   */
+  private canPerformInteraction(
+    type: "reply" | "like" | "retweet" | "quote"
+  ): boolean {
+    // First reset counters if needed
+    this.resetCountersIfNeeded();
+
+    // Check if within active hours
+    if (!this.isWithinActiveHours()) {
+      elizaLogger.log(`Outside of active hours, skipping ${type}`);
+      return false;
+    }
+
+    const settings = getTwitterSettings(this.runtime.character);
+
+    switch (type) {
+      case "reply":
+        if (this.repliesCount >= (settings.repliesPerHourLimit || Infinity)) {
+          elizaLogger.log(
+            `Reply rate limit reached (${this.repliesCount}/${settings.repliesPerHourLimit}), skipping reply`
+          );
+          return false;
+        }
+        return true;
+      case "like":
+        if (this.likesCount >= (settings.likesPerHourLimit || Infinity)) {
+          elizaLogger.log(
+            `Like rate limit reached (${this.likesCount}/${settings.likesPerHourLimit}), skipping like`
+          );
+          return false;
+        }
+        return true;
+      case "retweet":
+        if (this.retweetsCount >= (settings.retweetsPerHourLimit || Infinity)) {
+          elizaLogger.log(
+            `Retweet rate limit reached (${this.retweetsCount}/${settings.retweetsPerHourLimit}), skipping retweet`
+          );
+          return false;
+        }
+        return true;
+      case "quote":
+        if (this.quotesCount >= (settings.quotesPerHourLimit || Infinity)) {
+          elizaLogger.log(
+            `Quote rate limit reached (${this.quotesCount}/${settings.quotesPerHourLimit}), skipping quote`
+          );
+          return false;
+        }
+        return true;
+      default:
+        return true;
+    }
+  }
+
+  /**
+   * Increments the counter for a specific interaction type
+   * @param type The type of interaction to increment
+   */
+  private incrementInteractionCounter(
+    type: "reply" | "like" | "retweet" | "quote"
+  ): void {
+    switch (type) {
+      case "reply":
+        this.repliesCount++;
+        elizaLogger.log(`Reply counter incremented to ${this.repliesCount}`);
+        break;
+      case "like":
+        this.likesCount++;
+        elizaLogger.log(`Like counter incremented to ${this.likesCount}`);
+        break;
+      case "retweet":
+        this.retweetsCount++;
+        elizaLogger.log(`Retweet counter incremented to ${this.retweetsCount}`);
+        break;
+      case "quote":
+        this.quotesCount++;
+        elizaLogger.log(`Quote counter incremented to ${this.quotesCount}`);
+        break;
+    }
   }
 
   async start() {
@@ -501,6 +643,8 @@ export class TwitterInteractionClient {
 
           if (!shouldSuppressInitialMessage) {
             responseMessages = await callback(response);
+            // Increment reply counter after successful tweet
+            this.incrementInteractionCounter("reply");
           } else {
             responseMessages = [
               {
@@ -513,6 +657,8 @@ export class TwitterInteractionClient {
                 createdAt: Date.now(),
               },
             ];
+            // Increment reply counter for suppressed message too
+            this.incrementInteractionCounter("reply");
           }
 
           state = (await this.runtime.updateRecentMessageState(state)) as State;
