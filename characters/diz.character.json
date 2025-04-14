@@ -10,6 +10,7 @@
       "model": "en_GB-female-elegant"
     },
     "twitter": {
+      "disableRetweets": true,
       "targetUsers": [],
       "trackUsers": [],
       "includeVideos": true,

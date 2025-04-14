@@ -48,6 +48,10 @@ export interface TwitterSettings {
   retweetsPerHourLimitDescription?: string;
   quotesPerHourLimitDescription?: string;
 
+  // Disable specific interaction types
+  disableRetweets?: boolean; // Completely disable retweets
+  disableRetweetsDescription?: string;
+
   // Active hours settings
   activeHoursEnabled?: boolean;
   activeHoursStart?: number; // 0-23 hour format

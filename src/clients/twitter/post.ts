@@ -35,27 +35,6 @@ import { MediaData } from "./types.ts";
 
 const MAX_TIMELINES_TO_FETCH = 15;
 
-const twitterCommnetTemplate = `
-# Areas of Expertise
-{{knowledge}}
-
-# About {{agentName}} (@{{twitterUserName}}):
-{{bio}}
-{{lore}}
-{{topics}}
-
-{{providers}}
-
-{{characterPostExamples}}
-
-{{postDirections}}
-
-# Task: Generate a post in the voice and style and perspective of {{agentName}} @{{twitterUserName}}.
-Write a post that is {{adjective}} about {{topic}} (without mentioning {{topic}} directly), from the perspective of {{agentName}}.  
-Your response must be 2 or 3 sentences, separated by \\n\\n (doube spaces) to create distinct lines.  
-Each sentence should stand alone as a concise, impactful statement.  
-The total character count MUST be less than {{maxTweetLength}}.  `;
-
 const twitterPostTemplate = `
 # Areas of Expertise
 {{knowledge}}
@@ -92,11 +71,14 @@ Guidelines:
   - Generic/viral content without specific relevance
   - Political/controversial unless central to character
   - Promotional/marketing unless directly relevant
+  - Spam or low-quality content
+  - Avoid Crypto unless explicitly relevant
+  - GM or similar greetings
 
 Actions (respond only with tags):
 [LIKE] - Perfect topic match AND aligns with character (9.8/10)  
-[RETWEET] - Exceptional content that embodies character's expertise (9.5/10)  
-[QUOTE] - Can add substantial domain expertise (9.5/10)  
+[RETWEET] - only if its about beatiful females (9.5/10)  
+[QUOTE] - only if its about beatiful females, and can express ebcouragment (9.5/10)  
 [REPLY] - Meets ONE of the following:  
   - Can contribute meaningful, expert-level insight (9.5/10)  
   - Topic aligns with character AND opportunity to express support or encouragement (e.g., "Nice job!", "Great take!") (7.5/10)  
@@ -763,10 +745,6 @@ export class TwitterPostClient {
             }
           );
 
-          console.log(
-            "twitterActionTemplate",
-            this.runtime.character.templates?.twitterActionTemplate
-          );
           const actionContext = composeContext({
             state: tweetState,
             template:
@@ -879,7 +857,13 @@ export class TwitterPostClient {
         }
 
         if (actionResponse.retweet) {
-          if (this.isDryRun) {
+          // Check if retweets are disabled in settings
+          const twitterSettings = getTwitterSettings(this.runtime.character);
+          if (twitterSettings.disableRetweets) {
+            elizaLogger.log(
+              `Retweets are disabled in settings, skipping retweet for tweet ${tweet.id}`
+            );
+          } else if (this.isDryRun) {
             elizaLogger.info(`Dry run: would have retweeted tweet ${tweet.id}`);
             executedActions.push("retweet (dry run)");
           } else {
@@ -910,14 +894,27 @@ export class TwitterPostClient {
             const imageDescriptions = [];
             if (tweet.photos?.length > 0) {
               elizaLogger.log("Processing images in tweet for context");
-              for (const photo of tweet.photos) {
-                const description = await this.runtime
-                  .getService<IImageDescriptionService>(
-                    ServiceType.IMAGE_DESCRIPTION
-                  )
-                  .describeImage(photo.url);
-                imageDescriptions.push(description);
-              }
+
+              // for (const photo of tweet.photos) {
+              //   const description = await this.runtime
+              //     .getService<IImageDescriptionService>(
+              //       ServiceType.IMAGE_DESCRIPTION
+              //     )
+              //     .describeImage(photo.url);
+
+              //   console.log("DESCRIPTION", description);
+              //   if (
+              //     description.description
+              //       .toLowerCase()
+              //       .includes("describe_image")
+              //   ) {
+              //     description.description = description.description.replace(
+              //       "describe_image",
+              //       ""
+              //     );
+              //   }
+              //   imageDescriptions.push(description);
+              // }
             }
 
             // Handle quoted tweet if present

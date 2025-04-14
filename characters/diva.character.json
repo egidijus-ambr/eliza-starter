@@ -9,6 +9,7 @@
       "model": "en_US-hfc_female-medium"
     },
     "twitter": {
+      "disableRetweets": true,
       "ENABLE_TWITTER_POST_GENERATION": false,
       "targetUsers": [
         "nord_nordic",
