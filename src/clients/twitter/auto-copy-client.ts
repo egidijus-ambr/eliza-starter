@@ -495,27 +495,26 @@ export class TwitterAutoCopyClient {
 
       // Get image descriptions
       const imageDescriptions = [];
-      // if (photoUrls.length > 0) {
-      //   elizaLogger.info(`Analyzing ${photoUrls.length} images from tweet`);
-      //   for (let photoUrl of photoUrls) {
-      //     photoUrl =
-      //       "https://shop.vilmers.furnisystems.com/_next/image?url=https%3A%2F%2Fstorage.googleapis.com%2Ffurnisystems-main-bucket%2FALPSRF-ALPSRF-src_md.webp&w=3840&q=75";
-      //     try {
-      //       const description = await this.runtime
-      //         .getService<IImageDescriptionService>(
-      //           ServiceType.IMAGE_DESCRIPTION
-      //         )
-      //         .describeImage(photoUrl);
-      //       imageDescriptions.push(description);
-      //       elizaLogger.info(
-      //         `Image description: ${photoUrl} \n Title:${description.title} \n Description: ${description.description}`
-      //       );
-      //     } catch (error) {
-      //       elizaLogger.error(`Error analyzing image ${photoUrl}:`, error);
-      //     }
-      //   }
-      // }
+      if (photoUrls.length > 0) {
+        elizaLogger.info(`Analyzing ${photoUrls.length} images from tweet`);
+        // for (let photoUrl of photoUrls) {
+        //   try {
+        //     const description = await this.runtime
+        //       .getService<IImageDescriptionService>(
+        //         ServiceType.IMAGE_DESCRIPTION
+        //       )
+        //       .describeImage(photoUrl);
+        //     imageDescriptions.push(description);
+        //     elizaLogger.info(
+        //       `Image description: ${photoUrl} \n Title:${description.title} \n Description: ${description.description}`
+        //     );
+        //   } catch (error) {
+        //     elizaLogger.error(`Error analyzing image ${photoUrl}:`, error);
+        //   }
+        // }
+      }
 
+      console.log("Image descriptions:", imageDescriptions);
       // Generate AI-powered tweet content based on character's profile and image descriptions
       const postText = await this.generateTweetContent(imageDescriptions);
 
