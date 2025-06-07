@@ -148,6 +148,23 @@ export class TwitterPostClient {
     elizaLogger.log(
       `- Action Interval: ${this.client.twitterConfig.ACTION_INTERVAL} minutes`
     );
+
+    // Log time-based scheduling configuration
+    const startHour = this.client.twitterConfig.ACTION_START_HOUR;
+    const endHour = this.client.twitterConfig.ACTION_END_HOUR;
+    const timezone = this.client.twitterConfig.ACTION_TIMEZONE;
+
+    if (startHour !== undefined && endHour !== undefined) {
+      const timezoneStr = timezone
+        ? ` (${timezone} timezone)`
+        : " (local timezone)";
+      elizaLogger.log(
+        `- Action Time Window: ${startHour}:00 - ${endHour}:00${timezoneStr}`
+      );
+    } else {
+      elizaLogger.log("- Action Time Window: 24/7 (no restrictions)");
+    }
+
     elizaLogger.log(
       `- Post Immediately: ${
         this.client.twitterConfig.POST_IMMEDIATELY ? "enabled" : "disabled"
@@ -268,19 +285,47 @@ export class TwitterPostClient {
 
     const processActionsLoop = async () => {
       const actionInterval = this.client.twitterConfig.ACTION_INTERVAL; // Defaults to 5 minutes
+      const startHour = this.client.twitterConfig.ACTION_START_HOUR;
+      const endHour = this.client.twitterConfig.ACTION_END_HOUR;
+
+      // Log time-based configuration
+      if (startHour !== undefined && endHour !== undefined) {
+        const timezone = this.client.twitterConfig.ACTION_TIMEZONE || "local";
+        elizaLogger.log(
+          `Time-based scheduling enabled: ${startHour}:00 - ${endHour}:00 (${timezone} timezone)`
+        );
+      } else {
+        elizaLogger.log("Time-based scheduling disabled - running 24/7");
+      }
 
       while (!this.stopProcessingActions) {
         try {
-          const results = await this.processTweetActions();
-          if (results) {
-            elizaLogger.log(`Processed ${results.length} tweets`);
+          if (this.isWithinActiveHours()) {
+            // We're in active hours - process tweets normally
+            const results = await this.processTweetActions();
+            if (results) {
+              elizaLogger.log(`Processed ${results.length} tweets`);
+              elizaLogger.log(
+                `Next action processing scheduled in ${actionInterval} minutes`
+              );
+            }
+
+            // Wait for the regular interval before next processing
+            await new Promise((resolve) =>
+              setTimeout(resolve, actionInterval * 60 * 1000)
+            );
+          } else {
+            // We're outside active hours - wait until next active period
+            const timeUntilActive = this.calculateTimeUntilActive();
+            const durationStr = this.formatDuration(timeUntilActive);
+
             elizaLogger.log(
-              `Next action processing scheduled in ${actionInterval} minutes`
+              `Outside active hours (${startHour}:00 - ${endHour}:00). Sleeping for ${durationStr} until next active period`
             );
-            // Wait for the full interval before next processing
-            await new Promise(
-              (resolve) => setTimeout(resolve, actionInterval * 60 * 1000) // now in minutes
-            );
+
+            // Sleep until next active period (or check every 5 minutes minimum)
+            const sleepTime = Math.min(timeUntilActive, 5 * 60 * 1000); // Check at least every 5 minutes
+            await new Promise((resolve) => setTimeout(resolve, sleepTime));
           }
         } catch (error) {
           elizaLogger.error("Error in action processing loop:", error);
@@ -1089,12 +1134,12 @@ export class TwitterPostClient {
       const imageDescriptions = [];
       if (tweet.photos?.length > 0) {
         elizaLogger.log("Processing images in tweet for context");
-        // for (const photo of tweet.photos) {
-        //   const description = await this.runtime
-        //     .getService<IImageDescriptionService>(ServiceType.IMAGE_DESCRIPTION)
-        //     .describeImage(photo.url);
-        //   imageDescriptions.push(description);
-        // }
+        for (const photo of tweet.photos) {
+          const description = await this.runtime
+            .getService<IImageDescriptionService>(ServiceType.IMAGE_DESCRIPTION)
+            .describeImage(photo.url);
+          imageDescriptions.push(description);
+        }
       }
 
       // Handle quoted tweet if present
@@ -1180,6 +1225,111 @@ export class TwitterPostClient {
       }
     } catch (error) {
       elizaLogger.error("Error in handleTextOnlyReply:", error);
+    }
+  }
+
+  /**
+   * Checks if the current time is within the configured active hours
+   */
+  private isWithinActiveHours(): boolean {
+    const startHour = this.client.twitterConfig.ACTION_START_HOUR;
+    const endHour = this.client.twitterConfig.ACTION_END_HOUR;
+
+    // If no time restrictions are configured, always active
+    if (startHour === undefined || endHour === undefined) {
+      return true;
+    }
+
+    const now = new Date();
+    const timezone = this.client.twitterConfig.ACTION_TIMEZONE;
+
+    // Get current hour in the specified timezone (or local if not specified)
+    const currentHour = timezone
+      ? new Date(now.toLocaleString("en-US", { timeZone: timezone })).getHours()
+      : now.getHours();
+
+    // Handle normal case (start < end, e.g., 13-23)
+    if (startHour <= endHour) {
+      return currentHour >= startHour && currentHour <= endHour;
+    }
+
+    // Handle overnight case (start > end, e.g., 23-6)
+    return currentHour >= startHour || currentHour <= endHour;
+  }
+
+  /**
+   * Calculates milliseconds until the next active period starts
+   */
+  private calculateTimeUntilActive(): number {
+    const startHour = this.client.twitterConfig.ACTION_START_HOUR;
+    const endHour = this.client.twitterConfig.ACTION_END_HOUR;
+
+    // If no time restrictions are configured, return 0 (immediately active)
+    if (startHour === undefined || endHour === undefined) {
+      return 0;
+    }
+
+    const now = new Date();
+    const timezone = this.client.twitterConfig.ACTION_TIMEZONE;
+
+    // Create a date object in the correct timezone
+    const currentTime = timezone
+      ? new Date(now.toLocaleString("en-US", { timeZone: timezone }))
+      : now;
+
+    const currentHour = currentTime.getHours();
+    const currentMinutes = currentTime.getMinutes();
+    const currentSeconds = currentTime.getSeconds();
+
+    // Calculate start time for today
+    const todayStart = new Date(currentTime);
+    todayStart.setHours(startHour, 0, 0, 0);
+
+    // Calculate start time for tomorrow
+    const tomorrowStart = new Date(currentTime);
+    tomorrowStart.setDate(tomorrowStart.getDate() + 1);
+    tomorrowStart.setHours(startHour, 0, 0, 0);
+
+    let targetTime: Date;
+
+    if (startHour <= endHour) {
+      // Normal case (start < end)
+      if (currentHour < startHour) {
+        // Before start time today
+        targetTime = todayStart;
+      } else {
+        // After end time today or during active hours (shouldn't happen)
+        targetTime = tomorrowStart;
+      }
+    } else {
+      // Overnight case (start > end)
+      if (currentHour < startHour && currentHour > endHour) {
+        // In the gap between end and start
+        targetTime = todayStart;
+      } else {
+        // During active hours (shouldn't happen) or after start time
+        targetTime = tomorrowStart;
+      }
+    }
+
+    const timeDifference = targetTime.getTime() - currentTime.getTime();
+    return Math.max(0, timeDifference);
+  }
+
+  /**
+   * Formats time duration for logging
+   */
+  private formatDuration(milliseconds: number): string {
+    const hours = Math.floor(milliseconds / (1000 * 60 * 60));
+    const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((milliseconds % (1000 * 60)) / 1000);
+
+    if (hours > 0) {
+      return `${hours}h ${minutes}m ${seconds}s`;
+    } else if (minutes > 0) {
+      return `${minutes}m ${seconds}s`;
+    } else {
+      return `${seconds}s`;
     }
   }
 

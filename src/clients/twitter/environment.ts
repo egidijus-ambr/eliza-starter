@@ -75,6 +75,9 @@ export const twitterEnvSchema = z.object({
   POST_INTERVAL_MAX: z.number().int(),
   ENABLE_ACTION_PROCESSING: z.boolean(),
   ACTION_INTERVAL: z.number().int(),
+  ACTION_START_HOUR: z.number().int().min(0).max(23).optional(),
+  ACTION_END_HOUR: z.number().int().min(0).max(23).optional(),
+  ACTION_TIMEZONE: z.string().optional(),
   POST_IMMEDIATELY: z.boolean(),
   MAX_ACTIONS_PROCESSING: z.number().int(),
   ACTION_TIMELINE_TYPE: z
@@ -215,6 +218,33 @@ export async function validateTwitterConfig(
         runtime.getSetting("ACTION_INTERVAL") || process.env.ACTION_INTERVAL,
         5 // 5 minutes
       ),
+
+      // Action time window settings (optional)
+      ACTION_START_HOUR: (() => {
+        const value =
+          runtime.getSetting("ACTION_START_HOUR") ||
+          process.env[name + "ACTION_START_HOUR"] ||
+          process.env.ACTION_START_HOUR;
+        if (!value) return undefined;
+        const parsed = Number.parseInt(value, 10);
+        return isNaN(parsed) || parsed < 0 || parsed > 23 ? undefined : parsed;
+      })(),
+
+      ACTION_END_HOUR: (() => {
+        const value =
+          runtime.getSetting("ACTION_END_HOUR") ||
+          process.env[name + "ACTION_END_HOUR"] ||
+          process.env.ACTION_END_HOUR;
+        if (!value) return undefined;
+        const parsed = Number.parseInt(value, 10);
+        return isNaN(parsed) || parsed < 0 || parsed > 23 ? undefined : parsed;
+      })(),
+
+      ACTION_TIMEZONE:
+        runtime.getSetting("ACTION_TIMEZONE") ||
+        process.env[name + "ACTION_TIMEZONE"] ||
+        process.env.ACTION_TIMEZONE ||
+        undefined,
 
       // bool
       POST_IMMEDIATELY:
